@@ -12,6 +12,8 @@ async function startGame(chatId) {
   await bot.sendMessage(chatId, `Я загадаю число от 0 до 9. Попробуй угадать!`, gameOptions);
 }
 
+const hasKey = (obj, key) => obj[key] ? key : 'default';
+
 const start = () => {
   bot.setMyCommands([
     {command: '/start', description: 'Привет'},
@@ -24,24 +26,25 @@ const start = () => {
     const chatId = msg.chat.id;
     const firstName = msg.from.first_name || '';
     const lastName = msg.from.last_name || '';
-  
-    switch (text) {
-      case '/start':
+    const menu = {
+      '/start': async () => {
         await bot.sendSticker(chatId, 'https://cdn.tlgrm.app/stickers/893/dd2/893dd2f0-1a6e-4244-af64-ce6ab5c4e74a/192/1.webp');
         await bot.sendMessage(chatId, `Привет`);
-        break;
-      case '/info':
+      },
+      '/info': async () => {
         await bot.sendSticker(chatId, 'https://cdn.tlgrm.app/stickers/893/dd2/893dd2f0-1a6e-4244-af64-ce6ab5c4e74a/192/2.webp');
         await bot.sendMessage(chatId, `Твоё имя, ${firstName} ${lastName}`);
-        break;
-      case '/game':
+      },
+      '/game': async () => {
         startGame(chatId);
-        break;
-      default:
+      },
+      default: async () => {
         await bot.sendSticker(chatId, 'https://cdn.tlgrm.app/stickers/893/dd2/893dd2f0-1a6e-4244-af64-ce6ab5c4e74a/192/12.webp');
         await bot.sendMessage(chatId, `Я тебя не понимать`);
-        break;
-    }
+      }
+    };
+
+    menu[hasKey(menu, text)]();
   });
 
   bot.on('callback_query', async (msg) => {
